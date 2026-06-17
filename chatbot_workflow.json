@@ -1,0 +1,256 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Upload your data to test RAG",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload your file(s)",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf, .csv",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [-128, 0],
+      "id": "f7a656ec-83fc-4ed2-a089-57a9def662b7",
+      "name": "Upload your file here",
+      "webhookId": "82848bc4-5ea2-4e5a-8bb6-3c09b94a8c5d"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [256, 144],
+      "id": "94aecac0-03f9-4915-932b-d14a2576607b",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "content": "Load Data Flow",
+        "height": 460,
+        "width": 700,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-176, -64],
+      "typeVersion": 1,
+      "id": "d19d04f3-5231-4e47-bed7-9f24a4a8f582",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "vector_store_key",
+          "mode": "list",
+          "cachedResultName": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [64, 0],
+      "id": "bf50a11f-ca6a-4e04-a6d2-42fee272b260",
+      "name": "Insert Data to Store"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "knowledge_base",
+        "toolDescription": "Use this tool to search the knowledge base for answers to user questions about PT Simulasi Cipta Maya recruitment. \nSearch the PT Simulasi Cipta Maya recruitment FAQ knowledge base to find answers to user questions. \nThis tool returns FAQ content in format \"Q[number]: question\" and \"A[number]: answer\".\nExtract only the answer part (after A[number]:) and return it to the user.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "topK": 3
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.2,
+      "position": [1008, 208],
+      "id": "09c0db62-5413-440e-8c13-fb6bb66d9b6a",
+      "name": "Query Data Tool"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a helpful assistant for PT Simulasi Cipta Maya recruitment helpdesk.\n\nIMPORTANT RULES:\n1. When you need information, call the knowledge_base tool\n2. After the tool returns results, you MUST read and use that information\n3. NEVER show the tool call JSON to the user (like {\"name\": \"knowledge_base\", ...})\n4. ALWAYS extract the actual answer from the tool's response\n\nRESPONSE FORMAT:\nUse this exact template for every answer:\n\nSemangat Pagi, Terima kasih telah menghubungi helpdesk Rekrutmen Support PT Simulasi Cipta Maya.\n\n[Write the answer here - extract from knowledge_base tool result. Remove question numbers (Q18:, A18:, etc). Only include the actual answer text]\n\nSalam, Tim Rekrut PT Simulasi Cipta Maya\n\nEXAMPLE:\nUser asks: \"BOLEH SAYA MEMINTA KEMBALI FILE SURAT PERNYATAAN\"\nTool returns: \"A19: Berikut terlampir file pengisian SURAT PERNYATAAN. Terima kasih.\"\nYour response should be:\n\nSemangat Pagi, Terima kasih telah menghubungi helpdesk Rekrutmen Support PT Simulasi Cipta Maya.\n\nBerikut terlampir file pengisian SURAT PERNYATAAN.\n\nSalam, Tim Rekrut PT Simulasi Cipta Maya\n\nRemember: \n- Use the tool to get information\n- Extract and clean the answer (remove A19:, Q18:, etc)\n- Format with the template\n- Never show raw tool calls to users",
+          "maxIterations": 3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [944, -32],
+      "id": "579aed76-9644-42d1-ac13-7369059ff1c2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [624, -16],
+      "id": "9c30de61-935a-471f-ae88-ec5f67beeefc",
+      "name": "When chat message received",
+      "webhookId": "4091fa09-fb9a-4039-9411-7104d213f601"
+    },
+    {
+      "parameters": {
+        "content": "2. Retriever Flow",
+        "height": 460,
+        "width": 680,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [608, -64],
+      "typeVersion": 1,
+      "id": "28bc73a1-e64a-47bf-ac1c-ffe644894ea5",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [464, 496],
+      "id": "a7a51fbb-bfdd-4074-b5b8-f187ef6a7dbe",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "TKlqsD9YqgcojhbS",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b-instruct-q4_K_M",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [816, 192],
+      "id": "71c155d0-4d1b-4a3b-aaf0-c125a22b067b",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "TKlqsD9YqgcojhbS",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const userInput = $input.item.json.chatInput || '';\nconst normalizedInput = userInput.toLowerCase().replace(/[^a-z0-9\\s]/g, '').trim();\n\nconst faqMapping = [\n  {\n    target: \"BAGAIMANA MEKANISME REQUEST GANTI EMAIL KARENA EMAIL LAMA TIDAK AKTIF?\",\n    keywords: [\"ganti email\", \"email lama\", \"email tidak aktif\", \"email rusak\", \"email error\", \"ubah email\"]\n  },\n  {\n    target: \"BERAPA LAMA JADWAL DURASI ONLINE TEST?\",\n    keywords: [\"berapa lama\", \"durasi test\", \"lama waktu\", \"waktu tes\"]\n  },\n  {\n    target: \"BAGAIMANA APABILA SAYA INGIN RESCHEDULE JADWAL ONLINE TEST?\",\n    keywords: [\"reschedule\", \"ubah jadwal\", \"ganti jadwal\", \"pindah jadwal\", \"jadwal tes online\"]\n  },\n  {\n    target: \"BAGAIMANA MELAKUKAN ENTRY PERSONAL DATA-PENDIDIKAN YANG TERAKHIR ATAU YANG SAAT APPLY?\",\n    keywords: [\"entry pendidikan\", \"input pendidikan\", \"isi pendidikan\", \"data pendidikan\"]\n  },\n  {\n    target: \"DIMANA LOKASI PELAKSANAAN TES ASSESSMENT DAYS OFFLINE?\",\n    keywords: [\"lokasi tes\", \"tempat assessment\", \"dimana assessment\", \"lokasi assessment\"]\n  },\n  {\n    target: \"BAGAIMANA CARA MELAKUKAN UPDATE PERSONAL DATA & UBAH DATA DIRI?\",\n    keywords: [\"ubah data\", \"update data\", \"edit data\", \"ganti data\", \"personal data\"]\n  },\n  {\n    target: \"BAGAIMANA KETIKA SAYA TIDAK BISA UBAH/EDIT DATA KARENA PERNAH APPLY DI BATCH SEBELUMNYA?\",\n    keywords: [\"pernah apply\", \"batch sebelumnya\", \"tidak bisa ubah\", \"sudah apply\"]\n  },\n  {\n    target: \"SAYA TIDAK BISA LOGIN, BAGAIMANA SOLUSINYA?\",\n    keywords: [\"tidak bisa login\", \"gabisa login\", \"ga bisa login\", \"login error\", \"gagal login\", \"masuk gagal\"]\n  },\n  {\n    target: \"APAKAH KAMERA MEMPENGARUHI NILAI TES?\",\n    keywords: [\"kamera\", \"webcam\", \"pengaruh kamera\", \"nilai tes\"]\n  },\n  {\n    target: \"BAGAIMANA APABILA SEB FAILED?\",\n    keywords: [\"seb failed\", \"seb error\", \"seb gagal\", \"seb tidak bisa\"]\n  },\n  {\n    target: \"PASSWORD SEB APA?\",\n    keywords: [\"password seb\", \"kata sandi seb\", \"seb password\", \"pass seb\", \"pw seb\", \"apa password\", \"passwordnya apa\"]\n  },\n  {\n    target: \"BAGAIMANA APABILA DOKUMEN DI LUAR DOMISILI YANG TERDAFTAR?\",\n    keywords: [\"dokumen luar kota\", \"dokumen tertinggal\", \"dokumen beda kota\", \"domisili\"]\n  },\n  {\n    target: \"KAPAN EMAIL PEMBERITAHUAN KELULUSAN ONLINE TEST?\",\n    keywords: [\"kapan lulus\", \"pengumuman kelulusan\", \"email kelulusan\", \"hasil tes\", \"kapan pengumuman\", \"info kelulusan\"]\n  },\n  {\n    target: \"APAKAH SAYA BISA MENGAJUKAN RESCHEDULE JADWAL ASSESSMENT DAYS?\",\n    keywords: [\"reschedule assessment\", \"ubah jadwal assessment\", \"pindah assessment\", \"ganti jadwal assessment\"]\n  },\n  {\n    target: \"BELUM MUNCUL TOMBOL ATAU TIDAK BISA EDIT FULL CV, BAGAIMANA SOLUSINYA?\",\n    keywords: [\"tombol cv\", \"edit cv\", \"tidak bisa edit\", \"cv tidak muncul\"]\n  },\n  {\n    target: \"BAGAIMANA APABILA DOKUMEN ASLI UNTUK CEK BERKASNYA DALAM BENTUK DIGITAL?\",\n    keywords: [\"dokumen digital\", \"scan dokumen\", \"dokumen pdf\", \"cek berkas\"]\n  },\n  {\n    target: \"BAGAIMANA APABILA SOAL TEST ESSAI BIDANG TIDAK MUNCUL?\",\n    keywords: [\"soal essay\", \"essay tidak muncul\", \"esai tidak muncul\", \"test essay\", \"soal tidak muncul\"]\n  },\n  {\n    target: \"MOHON SOLUSINYA EMAIL TRIAL PSIKOTES BELUM SAYA TERIMA!\",\n    keywords: [\"email trial\", \"belum dapat email\", \"email psikotes\", \"trial psikotes\", \"belum terima\"]\n  },\n  {\n    target: \"BOLEH SAYA MEMINTA KEMBALI FILE SURAT PERNYATAAN?\",\n    keywords: [\"surat pernyataan\", \"file pernyataan\", \"minta surat\", \"pernyataan hilang\"]\n  },\n  {\n    target: \"BAGAIMANA APABILA SAYA BELUM MENGERJAKAN ESSAY?\",\n    keywords: [\"belum essay\", \"lupa essay\", \"tidak essay\", \"essay belum\"]\n  },\n  {\n    target: \"MOHON INFONYA PERIHAL JADWAL PSIKOTEST DAN ASSESSMENT DAY?\",\n    keywords: [\"jadwal psikotes\", \"kapan psikotest\", \"jadwal assessment\", \"waktu psikotes\", \"info jadwal\"]\n  }\n];\n\nfunction calculateScore(userQuery, itemKeywords) {\n  let score = 0;\n  const userWords = userQuery.split(/\\s+/).filter(w => w.length > 2);\n  const userWordSet = new Set(userWords);\n\n  let targetWordSet = new Set();\n  itemKeywords.forEach(phrase => {\n    const words = phrase.split(/\\s+/);\n    words.forEach(w => targetWordSet.add(w));\n  });\n\n  const PHRASE_MATCH_SCORE = 50;\n  const WORD_MATCH_SCORE = 15;\n\n  itemKeywords.forEach(phrase => {\n    if (userQuery.includes(phrase)) {\n      score += PHRASE_MATCH_SCORE;\n    }\n  });\n\n  let matchedWordsCount = 0;\n  userWordSet.forEach(uWord => {\n    if (targetWordSet.has(uWord)) {\n      matchedWordsCount++;\n    } \n    else {\n      for (let tWord of targetWordSet) {\n        if (tWord.includes(uWord) || uWord.includes(tWord)) {\n          if (Math.abs(tWord.length - uWord.length) <= 2) {\n             matchedWordsCount++;\n             break;\n          }\n        }\n      }\n    }\n  });\n\n  score += (matchedWordsCount * WORD_MATCH_SCORE);\n  return score;\n}\n\nlet finalQuery = userInput;\nlet isMatched = false;\nlet matchType = \"NONE\";\nlet bestScore = 0;\nlet bestMatch = null;\n\nconst exactMatch = faqMapping.find(item => \n  item.target.toLowerCase() === normalizedInput\n);\n\nif (exactMatch) {\n  finalQuery = exactMatch.target;\n  isMatched = true;\n  matchType = \"EXACT\";\n  bestScore = 1000;\n} else {\n  faqMapping.forEach(item => {\n    const score = calculateScore(normalizedInput, item.keywords);\n    if (score > bestScore) {\n      bestScore = score;\n      bestMatch = item;\n    }\n  });\n  \n  if (bestScore >= 25 && bestMatch) {\n    finalQuery = bestMatch.target;\n    isMatched = true;\n    matchType = \"FUZZY\";\n  }\n}\n\nconsole.log('=== QUERY MATCH RESULT ===');\nconsole.log(`Input  : \"${normalizedInput}\"`);\nconsole.log(`Matched: \"${finalQuery}\"`);\nconsole.log(`Score  : ${bestScore}`);\nconsole.log('==========================');\n\nreturn {\n  json: {\n    originalInput: userInput,\n    chatInput: finalQuery,\n    isMapped: isMatched,\n    method: matchType,\n    score: bestScore\n  }\n};"
+      },
+      "id": "65abb279-ca27-4c28-98e3-a3dc8296d75d",
+      "name": "Query Expansion1",
+      "type": "n8n-nodes-base.code",
+      "position": [784, -16],
+      "typeVersion": 2
+    }
+  ],
+  "connections": {
+    "Upload your file here": {
+      "main": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert Data to Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Data Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Query Expansion1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Query Data Tool",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Insert Data to Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Expansion1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateId": "rag-starter-template",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  }
+}
